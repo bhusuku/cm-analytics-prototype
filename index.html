@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Maestro Analytics — Pixel Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg-primary:#05070F;--bg-secondary:#080B15;--bg-card:#20222B;--bg-surface:#161823;
+--border:#36383E;--text-primary:#FAFAFA;--text-secondary:#EEEEEE;--text-muted:#737373;
+--accent-gold:#FCBC16;--accent-gold-light:#FCC344;--accent-orange:#F57A3F;
+--accent-violet:#6848D1;--accent-violet-light:#6969DD;--accent-magenta:#B0308C;
+--accent-blue:#206BCE;--accent-red:#E72D53;--success:#22C55E;--warning:#F59E0B;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:'Montserrat',Arial,sans-serif;font-size:14px;font-weight:400}
+h1,h2,h3,h4,h5,h6{font-family:'Inter',Arial,sans-serif;font-weight:700}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--border)}
+::-webkit-scrollbar-thumb{background:var(--accent-violet);border-radius:3px}
+
+/* Layout */
+.app{display:grid;grid-template-rows:56px 1fr 28px;grid-template-columns:240px 1fr;height:100vh;width:100vw}
+
+/* Top Bar */
+.topbar{grid-column:1/-1;background:#0A0D17;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;z-index:10}
+.topbar-logo{display:flex;align-items:center;gap:10px;min-width:200px}
+.topbar-logo .cm-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--accent-violet),var(--accent-gold));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:14px;color:#fff}
+.topbar-logo span{font-family:'Inter',sans-serif;font-weight:700;font-size:16px;color:var(--text-primary)}
+.topbar-center{flex:1;display:flex;justify-content:center}
+.project-selector{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 16px;color:var(--text-primary);font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.project-selector .dot{width:8px;height:8px;border-radius:50%;background:var(--success)}
+.topbar-right{display:flex;align-items:center;gap:16px;min-width:200px;justify-content:flex-end}
+.period-badge{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--text-secondary)}
+.help-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.help-btn:hover{border-color:var(--accent-gold);color:var(--accent-gold)}
+
+/* Sidebar */
+.sidebar{background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;padding-top:12px;overflow:hidden}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:0 8px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text-secondary)}
+.nav-item.active{color:var(--text-primary);background:rgba(252,188,22,.06);border-left-color:var(--accent-gold)}
+.nav-item .icon{font-size:18px;width:24px;text-align:center}
+.nav-item .label{font-weight:500}
+.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--border)}
+.beta-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;background:rgba(104,72,209,.2);color:var(--accent-violet-light);font-size:11px;font-weight:600;font-family:'Inter',sans-serif}
+
+/* Main Content */
+.main{overflow-y:auto;padding:24px 28px;background:var(--bg-primary)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Status Bar */
+.statusbar{grid-column:1/-1;background:#0A0D17;border-top:1px solid var(--border);display:flex;align-items:center;padding:0 20px;font-size:11px;color:var(--text-muted);gap:20px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block}
+
+/* Cards */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+/* KPI Row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi-card{text-align:center;padding:20px 16px}
+.kpi-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.kpi-value{font-family:'Inter',sans-serif;font-weight:700;font-size:32px;margin-bottom:6px}
+.kpi-delta{font-size:13px;font-weight:600}
+.kpi-delta.up{color:var(--success)}
+.kpi-delta.down{color:var(--accent-red)}
+
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.grid-2 .card h3{font-size:14px;margin-bottom:16px;color:var(--text-secondary)}
+.chart-wrap{position:relative;height:300px}
+.chart-wrap canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+
+/* Funnel */
+.funnel-step{display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:12px}
+.funnel-label{width:130px;text-align:right;color:var(--text-secondary);white-space:nowrap}
+.funnel-bar-wrap{flex:1;height:24px;background:var(--bg-surface);border-radius:4px;position:relative;overflow:hidden}
+.funnel-bar{height:100%;border-radius:4px;transition:width .5s;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;font-weight:600;color:#fff}
+.funnel-bar.normal{background:linear-gradient(90deg,var(--accent-violet),var(--accent-violet-light))}
+.funnel-bar.danger{background:linear-gradient(90deg,var(--accent-red),#f05070)}
+.funnel-pct{width:40px;font-weight:600;font-size:12px}
+.funnel-count{width:70px;color:var(--text-muted);font-size:11px;text-align:right}
+.funnel-drop{font-size:10px;color:var(--accent-red);font-weight:600;width:50px;text-align:center}
+
+/* Tables */
+table.data-table{width:100%;border-collapse:collapse;font-size:13px}
+table.data-table thead th{background:var(--bg-surface);padding:10px 12px;text-align:left;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--border)}
+table.data-table tbody td{padding:10px 12px;border-bottom:1px solid rgba(54,56,62,.5)}
+table.data-table tbody tr:nth-child(odd){background:var(--bg-card)}
+table.data-table tbody tr:nth-child(even){background:#1A1C26}
+table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
+
+/* Timeline */
+.timeline{display:flex;align-items:center;justify-content:space-between;padding:16px 0;position:relative}
+.timeline::before{content:'';position:absolute;top:50%;left:30px;right:30px;height:2px;background:var(--border)}
+.timeline-node{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1;position:relative}
+.timeline-dot{width:12px;height:12px;border-radius:50%;background:var(--accent-violet);border:2px solid var(--bg-card)}
+.timeline-dot.gold{background:var(--accent-gold)}
+.timeline-label{font-size:10px;color:var(--text-muted);white-space:nowrap}
+.timeline-time{font-size:11px;font-weight:600;color:var(--text-primary)}
+
+/* Tab 2: Insights */
+.insights-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;height:calc(100vh - 56px - 28px - 48px)}
+.insights-main{overflow-y:auto;padding-right:8px}
+.insights-ai{display:flex;flex-direction:column;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.summary-card{padding:16px;text-align:center}
+.summary-card .icon{font-size:24px;margin-bottom:8px}
+.summary-card h4{font-size:14px;margin-bottom:4px}
+.summary-card p{font-size:12px;color:var(--text-muted)}
+
+.insight-card{margin-bottom:16px;padding:20px}
+.insight-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.badge{display:inline-flex;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:'Inter',sans-serif}
+.badge-critical{background:rgba(231,45,83,.2);color:var(--accent-red)}
+.badge-warning{background:rgba(245,158,11,.2);color:var(--warning)}
+.badge-info{background:rgba(104,72,209,.2);color:var(--accent-violet-light)}
+.badge-success{background:rgba(34,197,94,.2);color:var(--success)}
+.insight-card h4{font-size:15px;margin-bottom:10px}
+.insight-card .analysis{font-size:13px;line-height:1.6;color:var(--text-secondary);margin-bottom:12px}
+.insight-data{background:var(--bg-surface);border-radius:6px;padding:12px;margin-bottom:12px;font-size:12px;line-height:1.7;color:var(--text-secondary)}
+.insight-data strong{color:var(--text-primary)}
+.insight-rec{font-size:13px;color:var(--accent-gold);margin-bottom:12px}
+.btn-gold{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;background:var(--accent-gold);color:#05070F;font-weight:600;font-size:12px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif}
+.btn-gold:hover{background:var(--accent-gold-light)}
+.btn-violet{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;background:linear-gradient(135deg,var(--accent-violet),var(--accent-violet-light));color:#fff;font-weight:600;font-size:12px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif}
+.btn-violet:hover{filter:brightness(1.1)}
+
+/* AI panel */
+.ai-header{padding:16px;border-bottom:1px solid var(--border);font-family:'Inter',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+.ai-body{flex:1;overflow-y:auto;padding:16px;font-size:13px;line-height:1.7;color:var(--text-secondary)}
+.ai-body .msg{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.ai-body .msg:last-child{border-bottom:none}
+.ai-body .highlight{color:var(--accent-gold);font-weight:600}
+.ai-body .stat{color:var(--text-primary);font-weight:600}
+.ai-input{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.ai-input input{flex:1;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text-muted);font-size:12px;font-family:'Montserrat',sans-serif}
+.ai-input button{background:var(--accent-violet);border:none;border-radius:6px;padding:8px 12px;color:#fff;cursor:not-allowed;opacity:.5;font-size:12px}
+
+/* Tab 3: Hypothesis Lab */
+.lab-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;height:calc(100vh - 56px - 28px - 48px)}
+.lab-main{overflow-y:auto;padding-right:8px}
+.lab-feed{display:flex;flex-direction:column;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.exp-status-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.exp-stat{text-align:center;padding:14px}
+.exp-stat .emoji{font-size:20px;margin-bottom:4px}
+.exp-stat .val{font-family:'Inter',sans-serif;font-weight:700;font-size:20px;margin-bottom:2px}
+.exp-stat .lbl{font-size:11px;color:var(--text-muted)}
+
+.exp-card{margin-bottom:16px;padding:20px}
+.exp-card h4{font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.exp-card .hypothesis{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;font-style:italic}
+.progress-bar{height:8px;background:var(--bg-surface);border-radius:4px;overflow:hidden;margin-bottom:12px}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent-violet),var(--accent-gold))}
+.progress-label{font-size:11px;color:var(--text-muted);margin-bottom:6px}
+.result-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px}
+.result-table th{text-align:left;padding:6px 10px;font-family:'Inter',sans-serif;font-weight:600;color:var(--text-muted);font-size:11px}
+.result-table td{padding:6px 10px;border-top:1px solid rgba(54,56,62,.4)}
+.result-table .improve{color:var(--success);font-weight:600}
+.exp-card .learning{background:var(--bg-surface);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;border-left:3px solid var(--accent-gold)}
+
+.variants-section{margin-top:8px}
+.variants-section h3{font-size:14px;margin-bottom:12px;color:var(--text-secondary)}
+.variant-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.variant-card{padding:16px}
+.variant-preview{height:100px;background:var(--bg-surface);border-radius:6px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.variant-card h5{font-size:13px;margin-bottom:4px}
+.variant-card p{font-size:11px;color:var(--text-muted);margin-bottom:8px}
+.badge-sm{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:600}
+
+/* Feed */
+.feed-header{padding:16px;border-bottom:1px solid var(--border);font-family:'Inter',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+.feed-body{flex:1;overflow-y:auto;padding:16px}
+.feed-item{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-date{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.feed-status{font-size:12px;font-weight:600;margin-bottom:6px}
+.feed-status.confirmed{color:var(--success)}
+.feed-status.rejected{color:var(--accent-red)}
+.feed-text{font-size:12px;line-height:1.6;color:var(--text-secondary);margin-bottom:6px}
+.feed-meta{font-size:11px;color:var(--text-muted)}
+
+/* Tab 4: Setup */
+.setup-content{max-width:720px}
+.setup-section{margin-bottom:24px}
+.setup-section h3{font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--text-secondary)}
+.event-list{list-style:none}
+.event-list li{padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:13px;border-bottom:1px solid rgba(54,56,62,.3)}
+.event-list li:last-child{border-bottom:none}
+.event-check{color:var(--success);font-size:14px}
+.event-name{font-weight:600;color:var(--text-primary);font-family:'Inter',sans-serif;min-width:160px}
+.event-desc{color:var(--text-muted);font-size:12px}
+.code-block{background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-family:'SF Mono','Fira Code',monospace;font-size:12px;color:var(--accent-gold);line-height:1.5}
+.integration-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px}
+.integration-status{font-size:14px}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tab-content.active{animation:fadeIn .25s ease}
+
+/* Width notice */
+.width-notice{display:none;position:fixed;inset:0;z-index:9999;background:var(--bg-primary);flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:40px}
+.width-notice h2{font-size:18px}
+.width-notice p{color:var(--text-muted);font-size:14px}
+@media(max-width:1200px){.width-notice{display:flex}.app{display:none}}
+</style>
+</head>
+<body>
+
+<div class="width-notice">
+  <h2>Best viewed at 1440px+ width</h2>
+  <p>Please resize your browser window for the full analytics experience.</p>
+</div>
+
+<div class="app">
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="cm-mark">CM</div>
+      <span>Code Maestro</span>
+    </div>
+    <div class="topbar-center">
+      <div class="project-selector">
+        <span class="dot"></span>
+        Pixel Quest &mdash; Crystal Games
+        <span style="color:var(--text-muted)">&#9662;</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="period-badge">&#128197; Mar 1&ndash;31, 2026</div>
+      <button class="help-btn">?</button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-tab="dashboard">
+        <span class="icon">&#128202;</span>
+        <span class="label">Dashboard</span>
+      </div>
+      <div class="nav-item" data-tab="insights">
+        <span class="icon">&#128300;</span>
+        <span class="label">Insights</span>
+      </div>
+      <div class="nav-item" data-tab="lab">
+        <span class="icon">&#129514;</span>
+        <span class="label">Hypothesis Lab</span>
+      </div>
+      <div class="nav-item" data-tab="setup">
+        <span class="icon">&#9881;</span>
+        <span class="label">Setup</span>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="beta-badge">&#9733; Analytics Beta</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- TAB 1: Dashboard -->
+    <section class="tab-content active" id="tab-dashboard">
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="card kpi-card">
+          <div class="kpi-label">Engagement Rate</div>
+          <div class="kpi-value" style="color:var(--success)">73.2%</div>
+          <div class="kpi-delta up">+5.1% &#8593;</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">Completion Rate</div>
+          <div class="kpi-value" style="color:var(--accent-red)">41.8%</div>
+          <div class="kpi-delta down">-2.3% &#8595;</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">CTA Click Rate</div>
+          <div class="kpi-value" style="color:var(--success)">18.4%</div>
+          <div class="kpi-delta up">+1.2% &#8593;</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">IPM (Installs/Mille)</div>
+          <div class="kpi-value" style="color:var(--accent-red)">12.6</div>
+          <div class="kpi-delta down">-3.8 &#8595;</div>
+        </div>
+      </div>
+
+      <!-- Row 2: Funnel + Performance -->
+      <div class="grid-2">
+        <div class="card">
+          <h3>Engagement Funnel</h3>
+          <div id="funnel-container"></div>
+        </div>
+        <div class="card">
+          <h3>Performance Over Time</h3>
+          <div class="chart-wrap"><canvas id="chart-performance"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Row 3: Drop-off + Network -->
+      <div class="grid-2">
+        <div class="card">
+          <h3>Drop-off Analysis</h3>
+          <div class="chart-wrap"><canvas id="chart-dropoff"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Network Comparison</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Metric</th><th>AppLovin</th><th>Meta</th><th>Google</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Impressions</td><td>34,200</td><td>12,800</td><td>5,400</td></tr>
+              <tr><td>ER</td><td>76.1%</td><td>68.3%</td><td>71.0%</td></tr>
+              <tr><td>IPM</td><td style="color:var(--success);font-weight:600">14.2</td><td>9.8</td><td>11.1</td></tr>
+              <tr><td>CPI</td><td style="color:var(--success);font-weight:600">$1.82</td><td>$2.41</td><td>$2.15</td></tr>
+              <tr><td>CTA Click Rate</td><td>19.8%</td><td>15.2%</td><td>17.6%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Event Timeline -->
+      <div class="card">
+        <h3 style="font-size:14px;margin-bottom:16px;color:var(--text-secondary)">Average User Journey Timeline</h3>
+        <div class="timeline">
+          <div class="timeline-node"><div class="timeline-dot gold"></div><div class="timeline-time">0s</div><div class="timeline-label">Load</div></div>
+          <div class="timeline-node"><div class="timeline-dot"></div><div class="timeline-time">1.2s</div><div class="timeline-label">First Touch</div></div>
+          <div class="timeline-node"><div class="timeline-dot"></div><div class="timeline-time">2.8s</div><div class="timeline-label">Tutorial</div></div>
+          <div class="timeline-node"><div class="timeline-dot"></div><div class="timeline-time">8.4s</div><div class="timeline-label">Game Start</div></div>
+          <div class="timeline-node"><div class="timeline-dot"></div><div class="timeline-time">14.1s</div><div class="timeline-label">Win</div></div>
+          <div class="timeline-node"><div class="timeline-dot"></div><div class="timeline-time">15.3s</div><div class="timeline-label">CTA Shown</div></div>
+          <div class="timeline-node"><div class="timeline-dot gold"></div><div class="timeline-time">17.8s</div><div class="timeline-label">CTA Click</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Insights -->
+    <section class="tab-content" id="tab-insights">
+      <div class="insights-layout">
+        <div class="insights-main">
+          <!-- Summary Cards -->
+          <div class="summary-row">
+            <div class="card summary-card" style="border-left:3px solid var(--accent-red)">
+              <div class="icon">&#9888;&#65039;</div>
+              <h4 style="color:var(--accent-red)">2 Critical Issues</h4>
+              <p>Tutorial drop-off and CTA underperformance need immediate attention</p>
+            </div>
+            <div class="card summary-card" style="border-left:3px solid var(--warning)">
+              <div class="icon">&#128161;</div>
+              <h4 style="color:var(--warning)">3 Opportunities</h4>
+              <p>Difficulty tuning, geo-targeting, CTA A/B testing</p>
+            </div>
+            <div class="card summary-card" style="border-left:3px solid var(--success)">
+              <div class="icon">&#10003;</div>
+              <h4 style="color:var(--success)">4 Strengths</h4>
+              <p>Strong engagement hook, good AppLovin performance, visual appeal</p>
+            </div>
+          </div>
+
+          <!-- Insight 1 -->
+          <div class="card insight-card">
+            <div class="insight-header">
+              <span class="badge badge-critical">CRITICAL</span>
+              <h4>Tutorial Drop-off (19% loss)</h4>
+            </div>
+            <div class="analysis">19% of users drop off between Tutorial Start and Tutorial Complete. The current tutorial has 3 steps with text instructions. Playables with 1-step visual tutorials in the same genre show 8% average drop-off.</div>
+            <div class="insight-data">
+              <strong>Current:</strong> 3 steps, text-based &rarr; 19% drop<br>
+              <strong>Benchmark (casual platformers):</strong> 1 step, visual &rarr; 8% drop<br>
+              <strong>Estimated impact:</strong> +5,800 users reaching game start per month
+            </div>
+            <div class="insight-rec">&#x1F4A1; Reduce tutorial to 1 visual step showing tap-to-jump gesture.</div>
+            <button class="btn-gold">Apply to Playable &rarr;</button>
+          </div>
+
+          <!-- Insight 2 -->
+          <div class="card insight-card">
+            <div class="insight-header">
+              <span class="badge badge-critical">CRITICAL</span>
+              <h4>"Satisfaction Trap" after Win (20% loss)</h4>
+            </div>
+            <div class="analysis">38% of users win the game, but only 18% click CTA. Users who WIN feel satisfied and don't need to install. This is the "Satisfaction Trap" &mdash; the playable is too complete an experience.</div>
+            <div class="insight-data">
+              <strong>Win &rarr; CTA Click:</strong> only 47% conversion<br>
+              <strong>Lose &rarr; CTA Click:</strong> 72% conversion (losers WANT to continue)<br>
+              <strong>Optimal win rate for casual platformers:</strong> 55&ndash;65%
+            </div>
+            <div class="insight-rec">&#x1F4A1; Increase difficulty so win rate drops to ~60%. Add "Level 2 awaits!" teaser after win.</div>
+            <button class="btn-gold">Apply to Playable &rarr;</button>
+          </div>
+
+          <!-- Insight 3 -->
+          <div class="card insight-card">
+            <div class="insight-header">
+              <span class="badge badge-warning">WARNING</span>
+              <h4>CTA Text Underperformance</h4>
+            </div>
+            <div class="analysis">"Download Now" CTA performs 23% below industry benchmark for casual games. Action-oriented CTAs ("Continue Playing", "Play Full Game") consistently outperform download-focused CTAs in playable ads.</div>
+            <div class="insight-rec">&#x1F4A1; Change CTA to "Continue Your Adventure &rarr;"</div>
+            <button class="btn-gold">Apply to Playable &rarr;</button>
+          </div>
+
+          <!-- Insight 4 -->
+          <div class="card insight-card">
+            <div class="insight-header">
+              <span class="badge badge-warning">WARNING</span>
+              <h4>Creative Fatigue Detected</h4>
+            </div>
+            <div class="analysis">IPM has declined 44% over 30 days (16.0 &rarr; 8.9). This matches typical creative fatigue patterns. Refresh cycle needed every 2&ndash;3 weeks for this genre.</div>
+            <div class="insight-rec">&#x1F4A1; Generate 3 visual variants with different themes/backgrounds.</div>
+            <button class="btn-violet">Generate Variants &rarr;</button>
+          </div>
+
+          <!-- Insight 5 -->
+          <div class="card insight-card">
+            <div class="insight-header">
+              <span class="badge badge-info">INFO</span>
+              <h4>Geo Performance Variation</h4>
+            </div>
+            <div class="analysis">US performs 2.1x better than LATAM on IPM but costs 3.4x more per install. LATAM has untapped potential with localized CTA text.</div>
+            <div class="insight-rec">&#x1F4A1; Create Spanish-language CTA variant for LATAM markets.</div>
+            <button class="btn-violet">Create Localized Variant &rarr;</button>
+          </div>
+        </div>
+
+        <!-- AI Panel -->
+        <div class="insights-ai">
+          <div class="ai-header">&#129302; Code Maestro AI</div>
+          <div class="ai-body">
+            <div class="msg">
+              I've analyzed <span class="stat">52,400 sessions</span> for "Pixel Quest" playable ad. Here's what I found:
+            </div>
+            <div class="msg">
+              &#128202; Your playable has <span class="highlight">STRONG engagement</span> (73% ER) but <span style="color:var(--accent-red);font-weight:600">WEAK conversion</span> (12.6 IPM). The gap is caused by two critical issues:<br><br>
+              1. <strong>Tutorial friction</strong> &mdash; losing 19% of users<br>
+              2. <strong>Satisfaction trap</strong> &mdash; winners don't convert
+            </div>
+            <div class="msg">
+              Together, fixing these could increase IPM by an estimated <span class="highlight">40&ndash;60%</span>.
+            </div>
+            <div class="msg">
+              &#128161; <strong>Quick wins available:</strong><br><br>
+              &bull; Simplify tutorial <span class="stat">(est. +5,800 users/mo)</span><br>
+              &bull; Adjust difficulty <span class="stat">(est. +3,200 installs/mo)</span><br>
+              &bull; Update CTA text <span class="stat">(est. +12% CTR)</span><br><br>
+              Want me to generate optimized variants?
+            </div>
+          </div>
+          <div class="ai-input">
+            <input type="text" placeholder="Ask about your analytics..." disabled>
+            <button disabled>&#10148;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Hypothesis Lab -->
+    <section class="tab-content" id="tab-lab">
+      <div class="lab-layout">
+        <div class="lab-main">
+          <!-- Status Bar -->
+          <div class="exp-status-bar">
+            <div class="card exp-stat"><div class="emoji">&#128994;</div><div class="val">2</div><div class="lbl">Running</div></div>
+            <div class="card exp-stat"><div class="emoji">&#9989;</div><div class="val">1</div><div class="lbl">Completed</div></div>
+            <div class="card exp-stat"><div class="emoji">&#128203;</div><div class="val">3</div><div class="lbl">Queued</div></div>
+            <div class="card exp-stat"><div class="emoji">&#129504;</div><div class="val">7</div><div class="lbl">Insights Validated</div></div>
+          </div>
+
+          <!-- Experiment 1 — Completed -->
+          <div class="card exp-card">
+            <h4><span class="badge badge-success">COMPLETED &#10003;</span> Experiment 1: Tutorial Simplification</h4>
+            <div class="hypothesis">Reducing tutorial from 3 steps to 1 visual step will decrease tutorial drop-off from 19% to &lt;10%.</div>
+            <p style="font-size:12px;color:var(--success);font-weight:600;margin-bottom:10px">&#10003; Hypothesis CONFIRMED</p>
+            <table class="result-table">
+              <thead><tr><th></th><th>Original</th><th>Variant</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Tutorial drop-off</td><td>19.0%</td><td style="color:var(--success);font-weight:600">7.2%</td><td class="improve">&#8595; 62% improvement</td></tr>
+                <tr><td>Completion Rate</td><td>41.8%</td><td style="color:var(--success);font-weight:600">53.1%</td><td class="improve">+11.3pp</td></tr>
+                <tr><td>IPM</td><td>12.6</td><td style="color:var(--success);font-weight:600">16.8</td><td class="improve">+33% &#127881;</td></tr>
+                <tr><td>Sessions</td><td>26,200</td><td>26,200</td><td></td></tr>
+              </tbody>
+            </table>
+            <div class="learning">&#129504; <strong>AI Learning:</strong> "Single-step visual tutorials outperform multi-step text tutorials for casual platformers. Applied to knowledge base."</div>
+            <button class="btn-violet" style="margin-right:8px">View Variant</button>
+            <button class="btn-gold">Apply as Default &rarr;</button>
+          </div>
+
+          <!-- Experiment 2 — Running -->
+          <div class="card exp-card">
+            <h4><span class="badge badge-success" style="background:rgba(34,197,94,.2)">&#128994; RUNNING</span> Experiment 2: Difficulty Tuning</h4>
+            <div class="hypothesis">Increasing difficulty to achieve ~60% win rate (from current 82%) will increase CTA clicks by 25%+.</div>
+            <div class="progress-label">Day 5 of 7 &mdash; 18,400 sessions collected</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div>
+            <p style="font-size:12px;color:var(--warning);font-weight:600;margin-bottom:10px">Early results promising</p>
+            <table class="result-table">
+              <thead><tr><th></th><th>Original</th><th>Variant</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Win Rate</td><td>82.0%</td><td>61.3%</td><td style="color:var(--text-muted)">on target</td></tr>
+                <tr><td>CTA Click</td><td>18.4%</td><td style="color:var(--success);font-weight:600">26.1%</td><td class="improve">+42% so far</td></tr>
+                <tr><td>IPM</td><td>12.6</td><td style="color:var(--success);font-weight:600">17.2</td><td class="improve">+37% &#128293;</td></tr>
+                <tr><td>Confidence</td><td>&mdash;</td><td>94.2%</td><td></td></tr>
+              </tbody>
+            </table>
+            <button class="btn-violet" style="margin-right:8px">Pause Experiment</button>
+            <button class="btn-violet">View Live Data</button>
+          </div>
+
+          <!-- Experiment 3 — Running -->
+          <div class="card exp-card">
+            <h4><span class="badge badge-success" style="background:rgba(34,197,94,.2)">&#128994; RUNNING</span> Experiment 3: CTA Variants</h4>
+            <div class="hypothesis">"Continue Your Adventure &rarr;" CTA will outperform "Download Now" by 15%+ on CTA click rate.</div>
+            <div class="progress-label">Day 2 of 7 &mdash; 8,100 sessions</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:29%"></div></div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Collecting data...</p>
+            <button class="btn-violet">View Details</button>
+          </div>
+
+          <!-- Generated Variants -->
+          <div class="variants-section">
+            <h3>Generated Variants</h3>
+            <div class="variant-grid">
+              <div class="card variant-card">
+                <div class="variant-preview">&#127922;</div>
+                <h5>Tutorial-Optimized</h5>
+                <p>1-step visual tutorial</p>
+                <span class="badge-sm badge-success">Applied</span>
+              </div>
+              <div class="card variant-card">
+                <div class="variant-preview">&#127919;</div>
+                <h5>Difficulty-Tuned</h5>
+                <p>Harder gameplay, 60% target win rate</p>
+                <span class="badge-sm badge-warning">Testing</span>
+              </div>
+              <div class="card variant-card">
+                <div class="variant-preview">&#128073;</div>
+                <h5>CTA-Optimized</h5>
+                <p>New CTA text + larger button</p>
+                <span class="badge-sm badge-warning">Testing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Learning Feed -->
+        <div class="lab-feed">
+          <div class="feed-header">&#129504; Knowledge Base &mdash; 7 validated insights</div>
+          <div class="feed-body">
+            <div class="feed-item">
+              <div class="feed-date">Mar 28, 2026</div>
+              <div class="feed-status confirmed">&#10003; CONFIRMED</div>
+              <div class="feed-text">"1-step visual tutorials reduce drop-off by 62% vs 3-step text tutorials for casual platformers"</div>
+              <div class="feed-meta">Confidence: 99.1% | 52,400 sessions</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-date">Mar 25, 2026</div>
+              <div class="feed-status confirmed">&#10003; CONFIRMED</div>
+              <div class="feed-text">"Countdown timers increase engagement +18% in casual genres but hurt mid-core (-8%)"</div>
+              <div class="feed-meta">Confidence: 97.3% | 34,100 sessions</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-date">Mar 22, 2026</div>
+              <div class="feed-status rejected">&#10007; REJECTED</div>
+              <div class="feed-text">"Adding score multiplier increases play duration"</div>
+              <div class="feed-meta">No significant effect (p=0.43)</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-date">Mar 18, 2026</div>
+              <div class="feed-status confirmed">&#10003; CONFIRMED</div>
+              <div class="feed-text">"Portrait orientation outperforms landscape by 12% on Meta, but landscape wins on AppLovin by 8%"</div>
+              <div class="feed-meta">Confidence: 96.8% | 41,200 sessions</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-date">Mar 15, 2026</div>
+              <div class="feed-status confirmed">&#10003; CONFIRMED</div>
+              <div class="feed-text">"Gold CTA buttons outperform green by 9% on dark backgrounds"</div>
+              <div class="feed-meta">Confidence: 95.1% | 28,400 sessions</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-date">Mar 11, 2026</div>
+              <div class="feed-status confirmed">&#10003; CONFIRMED</div>
+              <div class="feed-text">"Auto-play sound increases engagement by 6% but only on AppLovin (muted by default on Meta)"</div>
+              <div class="feed-meta">Confidence: 93.4% | 22,800 sessions</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-date">Mar 7, 2026</div>
+              <div class="feed-status confirmed">&#10003; CONFIRMED</div>
+              <div class="feed-text">"Playable ads under 20s have 15% higher completion rates than 30s+ for casual genres"</div>
+              <div class="feed-meta">Confidence: 91.7% | 19,600 sessions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Setup -->
+    <section class="tab-content" id="tab-setup">
+      <div class="setup-content">
+        <h2 style="font-size:18px;margin-bottom:20px">Event Configuration &mdash; Pixel Quest Playable</h2>
+
+        <div class="card setup-section">
+          <h3>&#10003; Standard Events (auto-tracked)</h3>
+          <ul class="event-list">
+            <li><span class="event-check">&#9745;</span><span class="event-name">ad_loaded</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">ad_ready</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">first_interaction</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">cta_shown</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">cta_click</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">store_redirect</span></li>
+          </ul>
+        </div>
+
+        <div class="card setup-section">
+          <h3>&#9881; Custom Events (configured)</h3>
+          <ul class="event-list">
+            <li><span class="event-check">&#9745;</span><span class="event-name">tutorial_start</span><span class="event-desc">Trigger: Tutorial overlay appears</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">tutorial_step</span><span class="event-desc">Trigger: Each step completion {step: 1|2|3}</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">tutorial_complete</span><span class="event-desc">Trigger: Tutorial dismissed</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">game_start</span><span class="event-desc">Trigger: First gameplay input</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">enemy_defeated</span><span class="event-desc">Trigger: Koopa/Goomba collision {enemy_type}</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">coin_collected</span><span class="event-desc">Trigger: Coin pickup {count}</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">game_win</span><span class="event-desc">Trigger: Level flag reached</span></li>
+            <li><span class="event-check">&#9745;</span><span class="event-name">game_lose</span><span class="event-desc">Trigger: Lives = 0</span></li>
+          </ul>
+        </div>
+
+        <div class="card setup-section">
+          <h3>&#128187; Code Snippet</h3>
+          <div class="code-block">CodeMaestro.track("tutorial_step", { step: 2, duration_ms: 1200 });</div>
+        </div>
+
+        <div class="card setup-section">
+          <h3>&#128279; Integration Status</h3>
+          <div class="integration-item"><span class="integration-status">&#9989;</span><strong>AppLovin</strong>&nbsp;&mdash; Connected, receiving events</div>
+          <div class="integration-item"><span class="integration-status">&#9989;</span><strong>Meta</strong>&nbsp;&mdash; Connected, receiving events</div>
+          <div class="integration-item"><span class="integration-status">&#9203;</span><strong>Google</strong>&nbsp;&mdash; Pending setup</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Status Bar -->
+  <footer class="statusbar">
+    <span><span class="status-dot"></span> Connected</span>
+    <span>52,400 sessions</span>
+    <span>Last sync: 2 min ago</span>
+    <span style="margin-left:auto">Code Maestro Analytics v0.9-beta</span>
+  </footer>
+</div>
+
+<script>
+// Tab navigation
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('tab-' + item.dataset.tab).classList.add('active');
+  });
+});
+
+// Build Funnel
+(function() {
+  const steps = [
+    { label: 'Ad Loaded', pct: 100, count: '52,400', drop: '' },
+    { label: 'First Interaction', pct: 73, count: '38,252', drop: '-27%' },
+    { label: 'Tutorial Start', pct: 68, count: '35,632', drop: '-5%' },
+    { label: 'Tutorial Complete', pct: 49, count: '25,676', drop: '-19%', danger: true },
+    { label: 'Game Start', pct: 47, count: '24,628', drop: '-2%' },
+    { label: 'Game Win', pct: 38, count: '19,912', drop: '-9%' },
+    { label: 'CTA Shown', pct: 36, count: '18,864', drop: '-2%' },
+    { label: 'CTA Click', pct: 18, count: '9,432', drop: '-18%', danger: true },
+    { label: 'Store Redirect', pct: 16, count: '8,384', drop: '-2%' }
+  ];
+  const c = document.getElementById('funnel-container');
+  steps.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'funnel-step';
+    row.innerHTML = `<span class="funnel-label">${s.label}</span>
+      <span class="funnel-pct">${s.pct}%</span>
+      <div class="funnel-bar-wrap"><div class="funnel-bar ${s.danger?'danger':'normal'}" style="width:${s.pct}%"></div></div>
+      <span class="funnel-count">${s.count}</span>
+      <span class="funnel-drop">${s.drop}</span>`;
+    c.appendChild(row);
+  });
+})();
+
+// Chart defaults
+Chart.defaults.color = '#737373';
+Chart.defaults.borderColor = '#36383E';
+Chart.defaults.font.family = "'Montserrat', sans-serif";
+
+// Performance Over Time
+(function() {
+  const days = Array.from({length:31},(_,i)=>'Mar '+(i+1));
+  const er = [71.5,72.1,73.4,72.8,74.2,73.9,74.5,73.1,72.6,73.8,74.1,73.5,74.0,72.9,73.2,73.6,74.3,73.0,72.4,73.7,74.6,73.2,72.8,73.1,74.0,73.5,72.6,73.9,72.3,73.2,73.0];
+  const ipm = [16.0,15.8,15.4,15.2,14.8,14.5,14.2,13.8,13.6,13.4,13.1,12.9,12.7,12.5,12.4,12.2,12.0,11.8,11.5,11.3,11.0,10.8,10.5,10.2,10.0,9.8,9.5,9.3,9.1,8.9,8.9];
+  new Chart(document.getElementById('chart-performance'),{
+    type:'line',
+    data:{
+      labels:days,
+      datasets:[
+        {label:'Engagement Rate %',data:er,borderColor:'#FCBC16',backgroundColor:'rgba(252,188,22,.1)',tension:.3,yAxisID:'y',pointRadius:0,borderWidth:2,fill:true},
+        {label:'IPM',data:ipm,borderColor:'#6848D1',backgroundColor:'rgba(104,72,209,.1)',tension:.3,yAxisID:'y1',pointRadius:0,borderWidth:2,fill:true}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:16,font:{size:11}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{maxTicksLimit:8,font:{size:10}}},
+        y:{position:'left',min:60,max:80,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(54,56,62,.4)'}},
+        y1:{position:'right',min:5,max:20,ticks:{font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+})();
+
+// Drop-off Analysis
+(function() {
+  const labels = ['Load → 1st Touch','1st Touch → Tutorial','Tutorial → Complete','Complete → Game','Game → Win','Win → CTA Shown','CTA Shown → Click','Click → Store'];
+  const values = [-27,-5,-19,-2,-9,-2,-18,-2];
+  const colors = values.map(v=>(v<=-18?'#E72D53':'#6848D1'));
+  new Chart(document.getElementById('chart-dropoff'),{
+    type:'bar',
+    data:{
+      labels:labels,
+      datasets:[{label:'Drop-off %',data:values,backgroundColor:colors,borderRadius:4,barThickness:20}]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
+      scales:{
+        x:{min:-30,max:0,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(54,56,62,.4)'}},
+        y:{ticks:{font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
