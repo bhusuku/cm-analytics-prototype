@@ -824,7 +824,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'dashboard',
       target: '#funnel-container',
-      arrow: 'right',
+      arrow: 'top',
       title: 'Engagement Funnel',
       body: 'The full user journey from ad load to store redirect. <span class="tour-red">Two critical drops</span> are highlighted in red: Tutorial (&#8209;19%) and CTA Click (&#8209;18%). These are the biggest growth opportunities.',
       scrollTop: 0
@@ -832,7 +832,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'dashboard',
       target: '#chart-performance',
-      arrow: 'left',
+      arrow: 'top',
       title: 'Performance Over Time',
       body: 'Two trend lines: <span class="tour-highlight">gold = Engagement Rate</span> (stable ~73%) and <span style="color:var(--accent-violet);font-weight:600">violet = IPM</span> (declining from 16 to 9). The IPM decline signals <span class="tour-red">creative fatigue</span> \u2014 the ad needs refreshing.',
       scrollTop: 0
@@ -840,7 +840,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'dashboard',
       target: '#chart-dropoff',
-      arrow: 'right',
+      arrow: 'top',
       title: 'Drop-off Analysis',
       body: 'A different view of the same data \u2014 showing exactly how much you lose at each step. The two red bars are your priority fixes.',
       scrollTop: 450
@@ -1154,13 +1154,16 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
       if (tt < 60) tt = 60;
     } else {
       if (step.arrow === 'right') {
-        tl = rect.left - tw - 40;
-        // Position tooltip ~halfway between center and spotlight
-        var spaceLeft = rect.left - 240;
-        if (spaceLeft > tw + 20) {
+        tl = rect.left - tw - 20;
+        // If not enough space to the left, place to the right instead
+        if (tl < 240) {
+          tl = rect.right + 20;
+          if (tl + tw > window.innerWidth - 16) tl = rect.left;
+        }
+        // For right-side panels (left edge > 60% of screen), offset into left space
+        if (rect.left > window.innerWidth * 0.55) {
+          var spaceLeft = rect.left - 240;
           tl = 240 + (spaceLeft - tw) * 0.75;
-        } else {
-          tl = 240;
         }
       } else {
         tl = rect.right + 20;
