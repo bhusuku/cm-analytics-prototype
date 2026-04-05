@@ -806,8 +806,8 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     // --- Dashboard: Section Intro ---
     {
       tab: 'dashboard',
-      target: '.main-content',
-      arrow: 'bottom',
+      intro: true,
+      target: '#tab-dashboard',
       title: '📊 Dashboard — Your Playable Ad Performance',
       body: 'The Dashboard is your <span class="tour-highlight">single source of truth</span> for playable ad analytics. It shows the complete picture: engagement funnel, drop-off analysis, performance trends over time, and network comparison.<br><br>Here you instantly see <em>what\'s happening</em> — where users engage, where they drop off, and how different ad networks compare. Think of it as your <span class="tour-highlight">data foundation</span> that feeds the AI layers above.',
       scrollTop: 0
@@ -848,7 +848,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'dashboard',
       target: '.data-table',
-      arrow: 'left',
+      arrow: 'top',
       title: 'Network Comparison',
       body: 'Compare performance across ad networks. <span class="tour-highlight">AppLovin</span> delivers the best IPM (14.2) and cheapest CPI ($1.82). Meta is more expensive but reaches a different audience.',
       scrollTop: 450
@@ -865,8 +865,8 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     // --- Insights: Section Intro ---
     {
       tab: 'insights',
-      target: '.main-content',
-      arrow: 'bottom',
+      intro: true,
+      target: '#tab-insights',
       title: '🔬 AI Insights — What the Data Means',
       body: 'The Insights tab is where <span class="tour-highlight">AI interprets your data</span>. Instead of staring at charts, you get specific, actionable findings: critical issues that cost you installs, opportunities for growth, and strengths to double down on.<br><br>Each insight comes with <em>industry benchmarks</em>, estimated impact, and a one-click "Apply to Playable" action. The AI doesn\'t just flag problems — it tells you <span class="tour-highlight">exactly what to do and why</span>.',
       scrollTop: 0
@@ -883,7 +883,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'insights',
       target: '.insight-card:nth-child(2)',
-      arrow: 'right',
+      arrow: 'bottom',
       title: 'Critical: Tutorial Drop-off',
       body: 'AI doesn\'t just spot problems \u2014 it compares with <span class="tour-highlight">industry benchmarks</span>. Your 19% drop-off vs 8% average means ~5,800 users lost per month. The fix: reduce to 1 visual tutorial step.',
       scrollTop: 0
@@ -891,7 +891,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'insights',
       target: '.insight-card:nth-child(3)',
-      arrow: 'right',
+      arrow: 'bottom',
       title: 'Critical: The Satisfaction Trap',
       body: 'The most powerful insight: users who <em>win</em> don\'t install (47% CTA click), but users who <em>lose</em> convert at 72%. The playable is <span class="tour-red">too satisfying</span> \u2014 they don\'t need the full game.',
       scrollTop: 200
@@ -899,7 +899,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'insights',
       target: '.insights-ai',
-      arrow: 'left',
+      arrow: 'right',
       title: 'AI Assistant Panel',
       body: 'The AI summarizes findings in a conversational format and quantifies the impact of fixes. In the future, you\'ll be able to ask questions like "Why did CTR drop last week?"',
       scrollTop: 0
@@ -908,8 +908,8 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     // --- Hypothesis Lab: Section Intro ---
     {
       tab: 'lab',
-      target: '.main-content',
-      arrow: 'bottom',
+      intro: true,
+      target: '#tab-lab',
       title: '🧪 Hypothesis Lab — AI Self-Learning Engine',
       body: 'This is where Code Maestro goes beyond analytics. The Hypothesis Lab is a <span class="tour-highlight">closed-loop optimization system</span>:<br><br>📊 AI analyzes data → 💡 AI formulates a hypothesis → 🎮 AI generates a playable variant → ⚡ A/B test runs automatically → 🧠 Results feed back into AI knowledge base.<br><br>No manual work needed — the AI <span class="tour-highlight">continuously improves your playable ads</span> and learns patterns that apply across all your future creatives.',
       scrollTop: 0
@@ -926,7 +926,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'lab',
       target: '#exp1',
-      arrow: 'right',
+      arrow: 'bottom',
       title: 'Completed Experiment',
       body: 'The tutorial fix experiment is done. Results: drop-off went from 19% to 7.2%, and <span class="tour-highlight">IPM increased 33%</span>. The AI confirmed the hypothesis and added it to its knowledge base.',
       scrollTop: 0
@@ -934,7 +934,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'lab',
       target: '#exp2',
-      arrow: 'right',
+      arrow: 'bottom',
       title: 'Running Experiment',
       body: 'The difficulty tuning experiment is on day 5 of 7. Early results show <span class="tour-highlight">+42% CTA clicks</span> with 94.2% confidence. The AI manages experiments end-to-end.',
       scrollTop: 300
@@ -942,7 +942,7 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     {
       tab: 'lab',
       target: '.lab-feed',
-      arrow: 'left',
+      arrow: 'right',
       title: 'Knowledge Base',
       body: 'Every validated insight becomes a permanent rule. The AI accumulates knowledge across all your playables \u2014 <span class="tour-highlight">each new ad starts smarter</span>. Note: rejected hypotheses are shown too.',
       scrollTop: 0
@@ -1078,9 +1078,37 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
     const el = document.querySelector(step.target);
     if (!el) { current++; showStep(); return; }
 
+    const tc = tabColors[step.tab] || tabColors.dashboard;
+
+    // Intro steps: no spotlight, centered tooltip
+    if (step.intro) {
+      spotlight.style.cssText = 'width:0;height:0;border:none;box-shadow:0 0 0 4000px rgba(0,0,0,.75)';
+      const dots = activeSteps.map((_, i) => {
+        let cls = 'tour-dot';
+        if (i === current) cls += ' active';
+        else if (i < current) cls += ' done';
+        return `<div class="${cls}"${i === current ? ' style="background:'+tc.color+'"' : ''}></div>`;
+      }).join('');
+      tooltip.innerHTML = `
+        <button class="tour-close" onclick="tourEnd()" title="End tour">&#10005;</button>
+        <div class="tour-step-badge" style="background:rgba(${tc.rgb},.15);color:${tc.color}">${tc.label} &middot; Step ${current + 1} of ${activeSteps.length}</div>
+        <h3>${step.title}</h3>
+        <p>${step.body}</p>
+        <div class="tour-nav">
+          ${current > 0 ? '<button class="tour-btn tour-btn-back" onclick="tourBack()">&#8592; Back</button>' : '<button class="tour-btn tour-btn-skip" onclick="tourEnd()">Skip</button>'}
+          <div class="tour-dots">${dots}</div>
+          <button class="tour-btn tour-btn-next" onclick="tourNext()">${current === activeSteps.length - 1 ? 'Finish &#10003;' : 'Next &#8594;'}</button>
+        </div>`;
+      tooltip.className = 'tour-tooltip';
+      const tw = 480;
+      tooltip.style.width = tw + 'px';
+      tooltip.style.left = ((window.innerWidth - tw) / 2) + 'px';
+      tooltip.style.top = ((window.innerHeight - 280) / 2) + 'px';
+      return;
+    }
+
     const rect = el.getBoundingClientRect();
     const pad = 6;
-    const tc = tabColors[step.tab] || tabColors.dashboard;
 
     // Spotlight — clamp to visible area (below topbar at 56px)
     const minTop = 56;
@@ -1126,8 +1154,14 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
       if (tt < 60) tt = 60;
     } else {
       if (step.arrow === 'right') {
-        tl = rect.left - tw - 20;
-        if (tl < 8) tl = rect.right + 20;
+        tl = rect.left - tw - 40;
+        // Position tooltip ~halfway between center and spotlight
+        var spaceLeft = rect.left - 240;
+        if (spaceLeft > tw + 20) {
+          tl = 240 + (spaceLeft - tw) * 0.75;
+        } else {
+          tl = 240;
+        }
       } else {
         tl = rect.right + 20;
         if (tl + tw > window.innerWidth - 16) tl = rect.left - tw - 20;
