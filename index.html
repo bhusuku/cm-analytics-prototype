@@ -209,6 +209,53 @@ table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
 .width-notice h2{font-size:18px}
 .width-notice p{color:var(--text-muted);font-size:14px}
 @media(max-width:1200px){.width-notice{display:flex}.app{display:none}}
+
+/* Onboarding Tour */
+.tour-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;display:none}
+.tour-overlay.active{pointer-events:auto;display:block}
+.tour-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9001;transition:opacity .3s}
+.tour-spotlight{position:absolute;z-index:9002;border-radius:10px;border:none;box-shadow:none;width:0;height:0;transition:all .4s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.tour-tooltip{position:absolute;z-index:9003;background:var(--bg-card);border:2px solid var(--accent-gold);border-radius:12px;padding:24px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,.5);pointer-events:auto;transition:all .4s cubic-bezier(.4,0,.2,1)}
+.tour-close{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;z-index:1}
+.tour-close:hover{border-color:var(--accent-red);color:var(--accent-red);background:rgba(231,45,83,.1)}
+.tour-step-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:12px;background:rgba(252,188,22,.15);color:var(--accent-gold);font-size:11px;font-weight:600;font-family:'Inter',sans-serif;margin-bottom:12px}
+.tour-tooltip h3{font-size:16px;margin-bottom:8px;color:var(--text-primary)}
+.tour-tooltip p{font-size:13px;line-height:1.65;color:var(--text-secondary);margin-bottom:16px}
+.tour-tooltip .tour-highlight{color:var(--accent-gold);font-weight:600}
+.tour-tooltip .tour-red{color:var(--accent-red);font-weight:600}
+.tour-nav{display:flex;align-items:center;gap:8px}
+.tour-nav .tour-dots{flex:1;display:flex;gap:4px;justify-content:center}
+.tour-nav .tour-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .2s}
+.tour-nav .tour-dot.active{background:var(--accent-gold);width:18px;border-radius:3px}
+.tour-nav .tour-dot.done{background:var(--accent-violet)}
+.tour-btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;transition:all .15s}
+.tour-btn-next{background:var(--accent-gold);color:#05070F}
+.tour-btn-next:hover{background:var(--accent-gold-light)}
+.tour-btn-back{background:transparent;border:1px solid var(--border);color:var(--text-secondary)}
+.tour-btn-back:hover{border-color:var(--text-muted);color:var(--text-primary)}
+.tour-btn-skip{background:transparent;color:var(--text-muted);font-size:11px;padding:6px 10px}
+.tour-btn-skip:hover{color:var(--text-secondary)}
+
+/* Welcome modal */
+.tour-welcome{position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:opacity .3s}
+.tour-welcome.active{opacity:1;pointer-events:auto}
+.tour-welcome-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:480px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.tour-welcome-card .logo{width:64px;height:64px;background:linear-gradient(135deg,var(--accent-violet),var(--accent-gold));border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-family:'Inter',sans-serif;font-weight:700;font-size:24px;color:#fff}
+.tour-welcome-card h2{font-size:22px;margin-bottom:8px}
+.tour-welcome-card .subtitle{color:var(--accent-gold);font-size:14px;font-weight:600;margin-bottom:16px}
+.tour-welcome-card p{color:var(--text-secondary);font-size:13px;line-height:1.6;margin-bottom:24px}
+.tour-welcome-card .features{display:flex;gap:16px;margin-bottom:28px;text-align:left}
+.tour-welcome-card .feature{flex:1;background:var(--bg-surface);border-radius:8px;padding:12px}
+.tour-welcome-card .feature .feat-icon{font-size:20px;margin-bottom:6px}
+.tour-welcome-card .feature h4{font-size:12px;margin-bottom:4px}
+.tour-welcome-card .feature p{font-size:11px;color:var(--text-muted);margin-bottom:0}
+.tour-welcome-btns{display:flex;gap:12px;justify-content:center}
+.tour-welcome-btns .tour-btn{padding:12px 28px;font-size:14px}
+
+/* Top bar tour button */
+.tour-topbar-btn{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:6px;border:none;background:var(--accent-gold);color:#05070F;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:0 2px 8px rgba(252,188,22,.3)}
+.tour-topbar-btn:hover{background:var(--accent-gold-light);box-shadow:0 2px 12px rgba(252,188,22,.5)}
+.tour-topbar-btn .tour-icon{font-size:14px}
 </style>
 </head>
 <body>
@@ -224,6 +271,10 @@ table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
     <div class="topbar-logo">
       <div class="cm-mark">CM</div>
       <span>Code Maestro</span>
+      <button class="tour-topbar-btn" onclick="startTourFromCurrentTab()">
+        <span class="tour-icon">&#128161;</span>
+        Explain the Interface <span style="font-weight:500;color:#05070F">(Guided Tour)</span>
+      </button>
     </div>
     <div class="topbar-center">
       <div class="project-selector">
@@ -475,7 +526,7 @@ table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
           </div>
 
           <!-- Experiment 1 — Completed -->
-          <div class="card exp-card">
+          <div class="card exp-card" id="exp1">
             <h4><span class="badge badge-success">COMPLETED &#10003;</span> Experiment 1: Tutorial Simplification</h4>
             <div class="hypothesis">Reducing tutorial from 3 steps to 1 visual step will decrease tutorial drop-off from 19% to &lt;10%.</div>
             <p style="font-size:12px;color:var(--success);font-weight:600;margin-bottom:10px">&#10003; Hypothesis CONFIRMED</p>
@@ -494,8 +545,8 @@ table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
           </div>
 
           <!-- Experiment 2 — Running -->
-          <div class="card exp-card">
-            <h4><span class="badge badge-success" style="background:rgba(34,197,94,.2)">&#128994; RUNNING</span> Experiment 2: Difficulty Tuning</h4>
+          <div class="card exp-card" id="exp2">
+            <h4 id="exp2-header"><span class="badge badge-success" style="background:rgba(34,197,94,.2)">&#128994; RUNNING</span> Experiment 2: Difficulty Tuning</h4>
             <div class="hypothesis">Increasing difficulty to achieve ~60% win rate (from current 82%) will increase CTA clicks by 25%+.</div>
             <div class="progress-label">Day 5 of 7 &mdash; 18,400 sessions collected</div>
             <div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div>
@@ -744,6 +795,358 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
       }
     }
   });
+})();
+
+// ============================================================
+// ONBOARDING TOUR
+// ============================================================
+(function() {
+  const steps = [
+    // --- Dashboard ---
+    {
+      tab: 'dashboard',
+      target: '.kpi-row',
+      arrow: 'bottom',
+      title: 'Key Metrics at a Glance',
+      body: 'Four KPI cards show the most important metrics for your playable ad. Notice the gap: <span class="tour-highlight">Engagement is strong (73%)</span> but <span class="tour-red">IPM is low and dropping (12.6)</span>. Users play but don\'t install.',
+      scrollTop: 0
+    },
+    {
+      tab: 'dashboard',
+      target: '#funnel-container',
+      arrow: 'right',
+      title: 'Engagement Funnel',
+      body: 'The full user journey from ad load to store redirect. <span class="tour-red">Two critical drops</span> are highlighted in red: Tutorial (&#8209;19%) and CTA Click (&#8209;18%). These are the biggest growth opportunities.',
+      scrollTop: 0
+    },
+    {
+      tab: 'dashboard',
+      target: '#chart-performance',
+      arrow: 'left',
+      title: 'Performance Over Time',
+      body: 'Two trend lines: <span class="tour-highlight">gold = Engagement Rate</span> (stable ~73%) and <span style="color:var(--accent-violet);font-weight:600">violet = IPM</span> (declining from 16 to 9). The IPM decline signals <span class="tour-red">creative fatigue</span> \u2014 the ad needs refreshing.',
+      scrollTop: 0
+    },
+    {
+      tab: 'dashboard',
+      target: '#chart-dropoff',
+      arrow: 'right',
+      title: 'Drop-off Analysis',
+      body: 'A different view of the same data \u2014 showing exactly how much you lose at each step. The two red bars are your priority fixes.',
+      scrollTop: 450
+    },
+    {
+      tab: 'dashboard',
+      target: '.data-table',
+      arrow: 'left',
+      title: 'Network Comparison',
+      body: 'Compare performance across ad networks. <span class="tour-highlight">AppLovin</span> delivers the best IPM (14.2) and cheapest CPI ($1.82). Meta is more expensive but reaches a different audience.',
+      scrollTop: 450
+    },
+    {
+      tab: 'dashboard',
+      target: '.timeline',
+      arrow: 'top',
+      title: 'User Journey Timeline',
+      body: 'The average timing of each event in the user journey. From ad load to CTA click takes about 17.8 seconds \u2014 this helps understand pacing and where users spend the most time.',
+      scrollTop: 700
+    },
+
+    // --- Insights ---
+    {
+      tab: 'insights',
+      target: '.summary-row',
+      arrow: 'bottom',
+      title: 'AI Analysis Summary',
+      body: 'The AI found <span class="tour-red">2 critical issues</span>, <span class="tour-highlight">3 opportunities</span>, and 4 strengths. This gives you an instant overview before diving into details.',
+      scrollTop: 0
+    },
+    {
+      tab: 'insights',
+      target: '.insight-card:nth-child(2)',
+      arrow: 'right',
+      title: 'Critical: Tutorial Drop-off',
+      body: 'AI doesn\'t just spot problems \u2014 it compares with <span class="tour-highlight">industry benchmarks</span>. Your 19% drop-off vs 8% average means ~5,800 users lost per month. The fix: reduce to 1 visual tutorial step.',
+      scrollTop: 0
+    },
+    {
+      tab: 'insights',
+      target: '.insight-card:nth-child(3)',
+      arrow: 'right',
+      title: 'Critical: The Satisfaction Trap',
+      body: 'The most powerful insight: users who <em>win</em> don\'t install (47% CTA click), but users who <em>lose</em> convert at 72%. The playable is <span class="tour-red">too satisfying</span> \u2014 they don\'t need the full game.',
+      scrollTop: 200
+    },
+    {
+      tab: 'insights',
+      target: '.insights-ai',
+      arrow: 'left',
+      title: 'AI Assistant Panel',
+      body: 'The AI summarizes findings in a conversational format and quantifies the impact of fixes. In the future, you\'ll be able to ask questions like "Why did CTR drop last week?"',
+      scrollTop: 0
+    },
+
+    // --- Hypothesis Lab ---
+    {
+      tab: 'lab',
+      target: '.exp-status-bar',
+      arrow: 'bottom',
+      title: 'Experiment Status',
+      body: 'A real-time overview: <span class="tour-highlight">2 experiments running</span>, 1 completed, 7 insights already validated. The AI continuously learns from your data.',
+      scrollTop: 0
+    },
+    {
+      tab: 'lab',
+      target: '#exp1',
+      arrow: 'right',
+      title: 'Completed Experiment',
+      body: 'The tutorial fix experiment is done. Results: drop-off went from 19% to 7.2%, and <span class="tour-highlight">IPM increased 33%</span>. The AI confirmed the hypothesis and added it to its knowledge base.',
+      scrollTop: 0
+    },
+    {
+      tab: 'lab',
+      target: '#exp2',
+      arrow: 'right',
+      title: 'Running Experiment',
+      body: 'The difficulty tuning experiment is on day 5 of 7. Early results show <span class="tour-highlight">+42% CTA clicks</span> with 94.2% confidence. The AI manages experiments end-to-end.',
+      scrollTop: 300
+    },
+    {
+      tab: 'lab',
+      target: '.lab-feed',
+      arrow: 'left',
+      title: 'Knowledge Base',
+      body: 'Every validated insight becomes a permanent rule. The AI accumulates knowledge across all your playables \u2014 <span class="tour-highlight">each new ad starts smarter</span>. Note: rejected hypotheses are shown too.',
+      scrollTop: 0
+    },
+    {
+      tab: 'lab',
+      target: '.variant-grid',
+      arrow: 'top',
+      title: 'AI-Generated Variants',
+      body: 'The AI creates playable ad variants automatically based on its recommendations. No manual work needed \u2014 just review and launch.',
+      scrollTop: 600
+    },
+
+  ];
+
+  let current = -1;
+  let overlay, spotlight, tooltip, welcomeModal;
+  let activeSteps = [];
+
+  function init() {
+    // Welcome modal
+    welcomeModal = document.createElement('div');
+    welcomeModal.className = 'tour-welcome';
+    welcomeModal.innerHTML = `
+      <div class="tour-welcome-card">
+        <div class="logo">CM</div>
+        <h2>Welcome to Code Maestro Analytics</h2>
+        <div class="subtitle">Interactive Prototype Tour</div>
+        <p>Take a guided tour through three levels of analytics intelligence for playable ads. See how data, AI insights, and automated experiments work together.</p>
+        <div class="features">
+          <div class="feature"><div class="feat-icon">&#128202;</div><h4>Dashboard</h4><p>Metrics & visualizations</p></div>
+          <div class="feature"><div class="feat-icon">&#128300;</div><h4>AI Insights</h4><p>Smart recommendations</p></div>
+          <div class="feature"><div class="feat-icon">&#129514;</div><h4>Hypothesis Lab</h4><p>Auto-experiments</p></div>
+        </div>
+        <div class="tour-welcome-btns">
+          <button class="tour-btn tour-btn-back" onclick="closeWelcome()">Skip Tour</button>
+          <button class="tour-btn tour-btn-next" onclick="startFullTour()">Start Tour &#8594;</button>
+        </div>
+      </div>`;
+    document.body.appendChild(welcomeModal);
+    setTimeout(() => { welcomeModal.classList.add('active'); }, 800);
+
+    // Overlay
+    overlay = document.createElement('div');
+    overlay.className = 'tour-overlay';
+    overlay.innerHTML = '<div class="tour-backdrop" style="display:none"></div>';
+    spotlight = document.createElement('div');
+    spotlight.className = 'tour-spotlight';
+    overlay.appendChild(spotlight);
+    tooltip = document.createElement('div');
+    tooltip.className = 'tour-tooltip';
+    overlay.appendChild(tooltip);
+    document.body.appendChild(overlay);
+  }
+
+  function getCurrentTab() {
+    const active = document.querySelector('.nav-item.active');
+    return active ? active.dataset.tab : 'dashboard';
+  }
+
+  window.closeWelcome = function() {
+    welcomeModal.classList.remove('active');
+  };
+
+  window.startFullTour = function() {
+    welcomeModal.classList.remove('active');
+    activeSteps = steps.slice();
+    current = 0;
+    overlay.classList.add('active');
+    showStep();
+  };
+
+  window.startTourFromCurrentTab = function() {
+    const tab = getCurrentTab();
+    activeSteps = steps.slice();
+    const idx = activeSteps.findIndex(s => s.tab === tab);
+    current = idx >= 0 ? idx : 0;
+    overlay.classList.add('active');
+    showStep();
+  };
+
+  function switchTab(tabName) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    const navItem = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
+    if (navItem) navItem.classList.add('active');
+    const tabContent = document.getElementById('tab-' + tabName);
+    if (tabContent) tabContent.classList.add('active');
+  }
+
+  const tabColors = {
+    dashboard: { color: '#FCBC16', rgb: '252,188,22', label: 'Dashboard' },
+    insights:  { color: '#22C55E', rgb: '34,197,94',  label: 'Insights' },
+    lab:       { color: '#206BCE', rgb: '32,107,206',  label: 'Hypothesis Lab' }
+  };
+
+  function showStep() {
+    if (current < 0 || current >= activeSteps.length) { endTour(); return; }
+    const step = activeSteps[current];
+    const tc = tabColors[step.tab] || tabColors.dashboard;
+
+    // Switch tab if needed
+    switchTab(step.tab);
+
+    // Update sidebar active color
+    document.querySelectorAll('.nav-item').forEach(n => n.style.borderLeftColor = '');
+    const activeNav = document.querySelector('.nav-item.active');
+    if (activeNav) activeNav.style.borderLeftColor = tc.color;
+
+    // Scroll main content
+    const main = document.querySelector('.main');
+    if (step.scrollTop !== undefined) main.scrollTop = step.scrollTop;
+
+    // Also scroll inner panels for insights/lab
+    if (step.tab === 'insights') {
+      const im = document.querySelector('.insights-main');
+      if (im) im.scrollTop = step.scrollTop || 0;
+    }
+    if (step.tab === 'lab') {
+      const lm = document.querySelector('.lab-main');
+      if (lm) lm.scrollTop = step.scrollTop || 0;
+    }
+
+    // Re-show tooltip and apply tab color
+    tooltip.style.display = '';
+    tooltip.style.borderColor = tc.color;
+    spotlight.style.border = '2px solid ' + tc.color;
+    spotlight.style.boxShadow = '0 0 0 4000px rgba(0,0,0,.65), 0 0 20px 4px rgba(' + tc.rgb + ',.2)';
+    requestAnimationFrame(() => { requestAnimationFrame(() => { positionStep(step); }); });
+  }
+
+  function positionStep(step) {
+    const el = document.querySelector(step.target);
+    if (!el) { current++; showStep(); return; }
+
+    const rect = el.getBoundingClientRect();
+    const pad = 6;
+    const tc = tabColors[step.tab] || tabColors.dashboard;
+
+    // Spotlight — clamp to visible area (below topbar at 56px)
+    const minTop = 56;
+    const sLeft = Math.max(0, rect.left - pad);
+    const sTop = Math.max(minTop, rect.top - pad);
+    const sBottom = Math.min(window.innerHeight - 28, rect.bottom + pad);
+    const sRight = Math.min(window.innerWidth, rect.right + pad);
+    spotlight.style.left = sLeft + 'px';
+    spotlight.style.top = sTop + 'px';
+    spotlight.style.width = (sRight - sLeft) + 'px';
+    spotlight.style.height = Math.max(0, sBottom - sTop) + 'px';
+
+    // Tooltip content with colored badge
+    const dots = activeSteps.map((_, i) => {
+      let cls = 'tour-dot';
+      if (i === current) cls += ' active';
+      else if (i < current) cls += ' done';
+      return `<div class="${cls}"${i === current ? ' style="background:'+tc.color+'"' : ''}></div>`;
+    }).join('');
+
+    tooltip.innerHTML = `
+      <button class="tour-close" onclick="tourEnd()" title="End tour">&#10005;</button>
+      <div class="tour-step-badge" style="background:rgba(${tc.rgb},.15);color:${tc.color}">${tc.label} &middot; Step ${current + 1} of ${activeSteps.length}</div>
+      <h3>${step.title}</h3>
+      <p>${step.body}</p>
+      <div class="tour-nav">
+        ${current > 0 ? '<button class="tour-btn tour-btn-back" onclick="tourBack()">&#8592; Back</button>' : '<button class="tour-btn tour-btn-skip" onclick="tourEnd()">Skip</button>'}
+        <div class="tour-dots">${dots}</div>
+        <button class="tour-btn tour-btn-next" onclick="tourNext()">${current === activeSteps.length - 1 ? 'Finish &#10003;' : 'Next &#8594;'}</button>
+      </div>`;
+
+    // Position tooltip
+    tooltip.className = 'tour-tooltip';
+    const tw = 380;
+    const th = 280;
+    let tl, tt;
+
+    if (step.arrow === 'bottom' || step.arrow === 'top') {
+      tl = rect.left;
+      tt = (step.arrow === 'bottom') ? rect.top - th - 16 : rect.bottom + 16;
+      if (tt < 60) tt = rect.bottom + 16;
+      if (tt + th > window.innerHeight - 40) tt = rect.top - th - 16;
+      if (tt < 60) tt = 60;
+    } else {
+      if (step.arrow === 'right') {
+        tl = rect.left - tw - 20;
+        if (tl < 8) tl = rect.right + 20;
+      } else {
+        tl = rect.right + 20;
+        if (tl + tw > window.innerWidth - 16) tl = rect.left - tw - 20;
+      }
+      tt = rect.top;
+    }
+
+    // Clamp to viewport
+    if (tl + tw > window.innerWidth - 12) tl = window.innerWidth - tw - 12;
+    if (tl < 8) tl = 8;
+    if (tt < 60) tt = 60;
+    if (tt + th > window.innerHeight - 36) tt = window.innerHeight - th - 36;
+
+    tooltip.style.left = tl + 'px';
+    tooltip.style.top = tt + 'px';
+  }
+
+  window.tourNext = function() {
+    current++;
+    if (current >= activeSteps.length) endTour();
+    else showStep();
+  };
+
+  window.tourBack = function() {
+    if (current > 0) { current--; showStep(); }
+  };
+
+  window.tourEnd = function() { endTour(); };
+
+  function endTour() {
+    overlay.classList.remove('active');
+    spotlight.style.cssText = 'width:0;height:0;border:none;box-shadow:none';
+    tooltip.style.display = 'none';
+    // Reset sidebar colors
+    document.querySelectorAll('.nav-item').forEach(n => n.style.borderLeftColor = '');
+    current = -1;
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (current < 0) return;
+    if (e.key === 'ArrowRight' || e.key === 'Enter') tourNext();
+    else if (e.key === 'ArrowLeft') tourBack();
+    else if (e.key === 'Escape') tourEnd();
+  });
+
+  init();
 })();
 </script>
 </body>
