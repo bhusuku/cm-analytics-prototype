@@ -40,6 +40,32 @@ h1,h2,h3,h4,h5,h6{font-family:'Inter',Arial,sans-serif;font-weight:700}
 .help-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
 .help-btn:hover{border-color:var(--accent-gold);color:var(--accent-gold)}
 
+/* Survey Button (topbar) */
+.survey-topbar-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;border:none;background:var(--accent-violet);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.survey-topbar-btn:hover{background:var(--accent-violet-light);box-shadow:0 2px 8px rgba(104,72,209,.4)}
+
+/* Survey Sidebar Nav Item */
+.survey-nav-item{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);color:var(--accent-violet-light) !important}
+.survey-nav-item:hover{background:rgba(104,72,209,.1) !important;color:var(--accent-violet-light) !important}
+
+/* Survey Popup */
+.survey-popup{position:fixed;inset:0;z-index:9600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:opacity .3s}
+.survey-popup.active{opacity:1;pointer-events:auto}
+.survey-popup-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:36px;max-width:420px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.5);position:relative}
+.survey-popup-close{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.survey-popup-close:hover{border-color:var(--accent-red);color:var(--accent-red)}
+.survey-popup-icon{font-size:40px;margin-bottom:16px}
+.survey-popup-card h3{font-size:18px;margin-bottom:10px;color:var(--text-primary)}
+.survey-popup-card p{font-size:13px;line-height:1.65;color:var(--text-secondary);margin-bottom:20px}
+.survey-popup-meta{display:flex;gap:20px;justify-content:center;margin-bottom:24px}
+.survey-meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)}
+.survey-meta-icon{font-size:16px}
+.survey-popup-btns{display:flex;gap:12px;justify-content:center}
+.survey-popup-btn-primary{padding:12px 28px;border-radius:8px;border:none;background:var(--accent-violet);color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.survey-popup-btn-primary:hover{background:var(--accent-violet-light);box-shadow:0 4px 16px rgba(104,72,209,.4)}
+.survey-popup-btn-secondary{padding:12px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
+.survey-popup-btn-secondary:hover{border-color:var(--text-muted);color:var(--text-secondary)}
+
 /* Sidebar */
 .sidebar{background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;padding-top:12px;overflow:hidden}
 .sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:0 8px}
@@ -286,6 +312,7 @@ table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
     </div>
     <div class="topbar-right">
       <div class="period-badge">&#128197; Mar 1&ndash;31, 2026</div>
+      <button class="survey-topbar-btn" onclick="window.open(SURVEY_URL, '_blank')">&#128203; Complete Survey</button>
       <button class="help-btn">?</button>
     </div>
   </header>
@@ -308,6 +335,10 @@ table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
       <div class="nav-item" data-tab="setup">
         <span class="icon">&#9881;</span>
         <span class="label">Setup</span>
+      </div>
+      <div class="nav-item survey-nav-item" onclick="window.open(SURVEY_URL, '_blank')">
+        <span class="icon">&#128203;</span>
+        <span class="label">Complete Survey</span>
       </div>
     </nav>
     <div class="sidebar-bottom">
@@ -707,11 +738,35 @@ table.data-table tbody tr:hover{background:rgba(255,255,255,.03)}
   </footer>
 </div>
 
+<div class="survey-popup" id="surveyPopup">
+  <div class="survey-popup-card">
+    <button class="survey-popup-close" onclick="closeSurveyPopup()">&times;</button>
+    <div class="survey-popup-icon">&#128203;</div>
+    <h3>&#1055;&#1086;&#1084;&#1086;&#1075;&#1080;&#1090;&#1077; &#1085;&#1072;&#1084; &#1089;&#1076;&#1077;&#1083;&#1072;&#1090;&#1100; &#1072;&#1085;&#1072;&#1083;&#1080;&#1090;&#1080;&#1082;&#1091; &#1083;&#1091;&#1095;&#1096;&#1077;!</h3>
+    <p>&#1042;&#1099; &#1090;&#1086;&#1083;&#1100;&#1082;&#1086; &#1095;&#1090;&#1086; &#1087;&#1086;&#1089;&#1084;&#1086;&#1090;&#1088;&#1077;&#1083;&#1080; &#1087;&#1088;&#1086;&#1090;&#1086;&#1090;&#1080;&#1087; Code Maestro Analytics. &#1042;&#1072;&#1096; &#1092;&#1080;&#1076;&#1073;&#1101;&#1082; &#1085;&#1072;&#1087;&#1088;&#1103;&#1084;&#1091;&#1102; &#1087;&#1086;&#1074;&#1083;&#1080;&#1103;&#1077;&#1090; &#1085;&#1072; &#1090;&#1086;, &#1095;&#1090;&#1086; &#1084;&#1099; &#1073;&#1091;&#1076;&#1077;&#1084; &#1089;&#1090;&#1088;&#1086;&#1080;&#1090;&#1100;.</p>
+    <div class="survey-popup-meta">
+      <div class="survey-meta-item"><span class="survey-meta-icon">&#9201;</span><span>~5 &#1084;&#1080;&#1085;&#1091;&#1090;</span></div>
+      <div class="survey-meta-item"><span class="survey-meta-icon">&#128202;</span><span>13 &#1074;&#1086;&#1087;&#1088;&#1086;&#1089;&#1086;&#1074;</span></div>
+    </div>
+    <div class="survey-popup-btns">
+      <button class="survey-popup-btn-primary" onclick="window.open(SURVEY_URL, '_blank'); closeSurveyPopup();">&#1055;&#1088;&#1086;&#1081;&#1090;&#1080; &#1086;&#1087;&#1088;&#1086;&#1089; &rarr;</button>
+      <button class="survey-popup-btn-secondary" onclick="closeSurveyPopup()">&#1055;&#1086;&#1079;&#1078;&#1077;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdp9oIiAR7knfb3zHy-K8gK3Ius1VTUou4singcBDq2JfZfMw/viewform?usp=sharing&ouid=113847959511373524950';
+function showSurveyPopup() { document.getElementById('surveyPopup').classList.add('active'); }
+function closeSurveyPopup() { document.getElementById('surveyPopup').classList.remove('active'); }
+</script>
+
 <script>
 // Tab navigation
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (item.classList.contains('survey-nav-item')) return;
+    document.querySelectorAll('.nav-item:not(.survey-nav-item)').forEach(n => n.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     item.classList.add('active');
     document.getElementById('tab-' + item.dataset.tab).classList.add('active');
@@ -1195,12 +1250,16 @@ Chart.defaults.font.family = "'Montserrat', sans-serif";
   window.tourEnd = function() { endTour(); };
 
   function endTour() {
+    const wasCompleted = current >= activeSteps.length - 1;
     overlay.classList.remove('active');
     spotlight.style.cssText = 'width:0;height:0;border:none;box-shadow:none';
     tooltip.style.display = 'none';
     // Reset sidebar colors
     document.querySelectorAll('.nav-item').forEach(n => n.style.borderLeftColor = '');
     current = -1;
+    if (wasCompleted) {
+      setTimeout(showSurveyPopup, 500);
+    }
   }
 
   // Keyboard navigation
